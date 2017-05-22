@@ -1,0 +1,54 @@
+.line {
+  stroke-width: 2;
+}
+
+.circle{
+  fill: #6bdce0;
+  transform-origin: center center;
+  cursor: pointer;
+}
+
+.stop-one {
+  stop-color: #7a5fff;
+}
+
+.stop-two {
+  stop-color: #01ff89;
+}
+
+.second-circle{
+  fill: #6bdce0;
+  transform: scale(0.5);
+  transform-origin: center center;
+  animation: pulse 1.5s linear infinite;
+  -webkit-animation: pulse 1.5s linear infinite;
+  animation-delay: 0.25s;
+  -webkit-animation-delay: 0.25s;
+}
+
+.third-circle{
+  fill: #6bdce0;
+  transform: scale(0.5);
+  transform-origin: center center;
+  animation: pulse 1.5s linear infinite;
+  -webkit-animation: pulse 1.5s linear infinite;
+  animation-delay: 0.75s;
+  -webkit-animation-delay: 0.75s;
+}
+
+@keyframes pulse{
+  0%{
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50%{
+    opacity: 0.2;
+  }
+  70%{
+    opacity: 0.15;
+  }
+  100%{
+    transform: scale(3);
+    opacity: 0;
+  }
+}
