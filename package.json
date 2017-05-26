@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "webpack && elm-css --module StyleCompiler elm-app/StyleCompiler.elm",
     "dev": "webpack-dev-server --hot --inline --port 3000"
   },
   "devDependencies": {

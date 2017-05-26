@@ -1,5 +1,5 @@
 elm-stuff
 node_modules
 npm-debug.log
-app.bundle.js
+app.bundle.*
 index.html

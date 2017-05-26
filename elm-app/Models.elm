@@ -16,6 +16,10 @@ type alias Model =
   , interactionCounter : Int
   }
 
+type Animations
+  = Pulse
+
+
 initialModel : Model
 initialModel =
   { vertices = []

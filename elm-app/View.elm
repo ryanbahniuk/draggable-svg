@@ -2,13 +2,18 @@ module View exposing (..)
 
 import List exposing (map, length)
 import String exposing (join)
+import Html.CssHelpers
 import Svg exposing (Svg, svg, g, defs, polyline, circle, linearGradient, stop, animate)
 import Svg.Events exposing (onMouseUp)
-import Svg.Attributes exposing (cx, cy, r, x1, y1, x2, y2, width, height, viewBox, offset, fill, id, class, attributeName, values, dur, repeatCount, points, stroke)
+import Svg.Attributes exposing (cx, cy, r, x1, y1, x2, y2, width, height, viewBox, offset, fill, id, attributeName, values, dur, repeatCount, points, stroke)
 import Models exposing (Model, Vertex, Coordinates)
 import Messages exposing (Msg(..))
 import Events exposing (onMouseMove, onClick, onStopPropClick, onStopPropMouseDown)
 import Helpers exposing (noneInFlight)
+import Style
+
+{ class } =
+  Html.CssHelpers.withNamespace ""
 
 view : Model -> Svg Msg
 view model =
@@ -29,10 +34,10 @@ gradient : Svg Msg
 gradient =
   defs []
   [ linearGradient [ id "gradient", x1 "0%", y1 "0%", x2 "100%", y2 "0%" ]
-    [ stop [ offset "0%", class "stop-one" ]
+    [ stop [ offset "0%", class [ Style.StopOne ] ]
       [ animate [ attributeName "stop-color", values "#7A5FFF; #01FF89; #7A5FFF", dur "4s", repeatCount "indefinite" ] []
       ]
-    , stop [ offset "100%", class "stop-two" ]
+    , stop [ offset "100%", class [ Style.StopTwo ] ]
       [ animate [ attributeName "stop-color", values "#01FF89; #7A5FFF; #01FF89", dur "4s", repeatCount "indefinite" ] []
       ]
     ]
@@ -40,7 +45,7 @@ gradient =
 
 polylineView : List Vertex -> Svg Msg
 polylineView vertices =
-  polyline [ fill "url(#gradient)", polylineStroke vertices, class "line", points (polyPoints (map .coordinates vertices)) ] []
+  polyline [ fill "url(#gradient)", polylineStroke vertices, class [ Style.Line ], points (polyPoints (map .coordinates vertices)) ] []
 
 polylineStroke : List Vertex -> Svg.Attribute Msg
 polylineStroke vertices =
@@ -56,7 +61,7 @@ polyPoints coordinates =
 circleView : Vertex -> Svg Msg
 circleView vertex =
   g []
-  [ circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class "third-circle" ] []
-  , circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class "second-circle" ] []
-  , circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class "circle", onStopPropMouseDown (Unlock vertex) ] []
+  [ circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class [ Style.ThirdCircle ] ] []
+  , circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class [ Style.SecondCircle ] ] []
+  , circle [ cx (toString vertex.coordinates.x), cy (toString vertex.coordinates.y), r "10", class [ Style.Circle ], onStopPropMouseDown (Unlock vertex) ] []
   ]
