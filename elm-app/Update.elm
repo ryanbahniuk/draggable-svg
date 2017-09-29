@@ -1,30 +1,40 @@
 module Update exposing (..)
 
-import List exposing (map, append)
+import List exposing (map, append, filter)
 import Models exposing (Model, Vertex, Coordinates, initialVertex)
 import Messages exposing (Msg(..))
-import Helpers exposing (anyInFlight)
+import Helpers exposing (anyInFlight, isNotInFlight)
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     Noop ->
-      model
+      ( model, Cmd.none )
 
     Add coordinates ->
       if (anyInFlight model.vertices) then
-        model
+        ( model, Cmd.none )
       else
-        { model | vertices = (append model.vertices [(initialVertex model.interactionCounter coordinates)]), interactionCounter = model.interactionCounter + 1 }
+        ( { model | vertices = (append model.vertices [(initialVertex model.interactionCounter coordinates)]), interactionCounter = model.interactionCounter + 1 }, Cmd.none )
 
     Unlock vertex ->
-      { model | vertices = (unlockVertex model.vertices vertex) }
+      ( { model | vertices = (unlockVertex model.vertices vertex) }, Cmd.none )
 
     Lock ->
-      { model | vertices = (lockAllVertices model.vertices) }
+      ( { model | vertices = (lockAllVertices model.vertices) }, Cmd.none )
 
     Track coordinates ->
-      { model | vertices = (updateInFlightVertex model.vertices coordinates) }
+      ( { model | vertices = (updateInFlightVertex model.vertices coordinates) }, Cmd.none )
+
+    KeyPressedResponse key ->
+      if key == 8 then
+        ( { model | vertices = (deleteInFlightVertex model.vertices) }, Cmd.none )
+      else
+        ( model, Cmd.none )
+
+deleteInFlightVertex : List Vertex -> List Vertex
+deleteInFlightVertex vertices =
+  filter isNotInFlight vertices
 
 updateInFlightVertex : List Vertex -> Coordinates -> List Vertex
 updateInFlightVertex vertices coordinates =

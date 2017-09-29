@@ -7,5 +7,6 @@ type Msg
   | Unlock Vertex
   | Lock
   | Track Coordinates
+  | KeyPressedResponse Int
   | Noop
 

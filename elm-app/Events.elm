@@ -1,6 +1,7 @@
 module Events exposing (..)
 
 import Svg exposing (Attribute)
+import Html.Events exposing (keyCode)
 import Svg.Events exposing (on)
 import Json.Decode exposing (succeed, map)
 import VirtualDom exposing (Options, onWithOptions)
@@ -9,7 +10,7 @@ import Decoders exposing (coordinateDecoder)
 
 onClick : (Coordinates -> msg) -> Attribute msg
 onClick message =
-  on "click" (map message coordinateDecoder)
+  on "mousedown" (map message coordinateDecoder)
 
 onMouseMove : (Coordinates -> msg) -> Attribute msg
 onMouseMove message =
@@ -25,7 +26,7 @@ onStopPropMouseUp message =
 
 onStopPropClick : msg -> Attribute msg
 onStopPropClick message =
-  onWithOptions "click" stopPropOptions (succeed message)
+  onWithOptions "mousedown" stopPropOptions (succeed message)
 
 stopPropOptions : Options
 stopPropOptions =

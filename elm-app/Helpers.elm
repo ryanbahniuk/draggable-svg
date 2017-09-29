@@ -5,9 +5,17 @@ import Models exposing (Vertex)
 
 anyInFlight : List Vertex -> Bool
 anyInFlight vertices =
-  any (\n -> (n.inFlight == True)) vertices
+  any isInFlight vertices
 
 noneInFlight : List Vertex -> Bool
 noneInFlight vertices =
-  all (\n -> (n.inFlight == False)) vertices
+  all (\n -> (isNotInFlight n)) vertices
+
+isInFlight : Vertex -> Bool
+isInFlight vertex =
+  vertex.inFlight
+
+isNotInFlight : Vertex -> Bool
+isNotInFlight vertex =
+  not (isInFlight vertex)
 
