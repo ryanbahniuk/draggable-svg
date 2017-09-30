@@ -9,6 +9,7 @@ import Models exposing (Model, Vertex, Coordinates)
 import Messages exposing (Msg(..))
 import Events exposing (onMouseMove, onClick, onStopPropClick, onStopPropMouseDown)
 import Helpers exposing (noneInFlight)
+import Colors exposing (greenHex, purpleHex, turquoiseHex)
 
 view : Model -> Svg Msg
 view model =
@@ -25,15 +26,23 @@ clickAction model =
   else
     onStopPropClick Noop
 
+stopOneAnimationColor : String
+stopOneAnimationColor =
+  purpleHex ++ "; " ++ greenHex ++ "; " ++ purpleHex
+
+stopTwoAnimationColor : String
+stopTwoAnimationColor =
+  greenHex ++ "; " ++ purpleHex ++ "; " ++ greenHex
+
 gradient : Svg Msg
 gradient =
   defs []
   [ linearGradient [ id "gradient", x1 "0%", y1 "0%", x2 "100%", y2 "0%" ]
     [ stop [ offset "0%", class "stop-one" ]
-      [ animate [ attributeName "stop-color", values "#7A5FFF; #01FF89; #7A5FFF", dur "4s", repeatCount "indefinite" ] []
+      [ animate [ attributeName "stop-color", values stopOneAnimationColor, dur "4s", repeatCount "indefinite" ] []
       ]
     , stop [ offset "100%", class "stop-two" ]
-      [ animate [ attributeName "stop-color", values "#01FF89; #7A5FFF; #01FF89", dur "4s", repeatCount "indefinite" ] []
+      [ animate [ attributeName "stop-color", values stopTwoAnimationColor, dur "4s", repeatCount "indefinite" ] []
       ]
     ]
   ]
@@ -47,7 +56,7 @@ polylineStroke vertices =
   if (length vertices) > 2 then
     stroke "none"
   else
-    stroke "#6bdce0"
+    stroke turquoiseHex
 
 polyPoints : List Coordinates -> String
 polyPoints coordinates =
