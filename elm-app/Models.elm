@@ -33,6 +33,10 @@ initialPolygon : Int -> Coordinates -> Polygon
 initialPolygon id coordinates =
   Polygon id [(initialVertex id coordinates)]
 
+initialEmptyPolygon : Int -> Polygon
+initialEmptyPolygon id =
+  Polygon id []
+
 initialVertex : Int -> Coordinates -> Vertex
 initialVertex id coordinates =
   Vertex id coordinates False

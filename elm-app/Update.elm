@@ -1,7 +1,7 @@
 module Update exposing (..)
 
 import List exposing (head, map, append, filter, length)
-import Models exposing (Model, Polygon, Vertex, Coordinates, initialVertex, initialPolygon)
+import Models exposing (Model, Polygon, Vertex, Coordinates, initialVertex, initialPolygon, initialEmptyPolygon)
 import Messages exposing (Msg(..))
 import Helpers exposing (anyInFlight, isNotInFlight, anyVertexInFlight)
 import String exposing (join)
@@ -47,6 +47,11 @@ update msg model =
               ( model, Cmd.none )
           Nothing ->
             ( model, Cmd.none )
+      else if key == 13 then
+        let
+          newPolygon = (initialEmptyPolygon model.interactionCounter)
+        in
+          ( { model | polygons = (append model.polygons [newPolygon]), selectedPolygonId = Just newPolygon.id, interactionCounter = model.interactionCounter + 1 }, Cmd.none )
       else
         ( model, Cmd.none )
 
