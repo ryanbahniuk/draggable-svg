@@ -1,9 +1,10 @@
 module Update exposing (..)
 
-import List exposing (map, append, filter)
-import Models exposing (Model, Vertex, Coordinates, initialVertex)
+import List exposing (head, map, append, filter, length)
+import Models exposing (Model, Polygon, Vertex, Coordinates, initialVertex, initialPolygon)
 import Messages exposing (Msg(..))
-import Helpers exposing (anyInFlight, isNotInFlight)
+import Helpers exposing (anyInFlight, isNotInFlight, anyVertexInFlight)
+import String exposing (join)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -12,41 +13,97 @@ update msg model =
       ( model, Cmd.none )
 
     Add coordinates ->
-      if (anyInFlight model.vertices) then
+      if (anyInFlight model.polygons) then
         ( model, Cmd.none )
       else
-        ( { model | vertices = (append model.vertices [(initialVertex model.interactionCounter coordinates)]), interactionCounter = model.interactionCounter + 1 }, Cmd.none )
+        case model.selectedPolygonId of
+          Just selectedPolygonId ->
+            ( { model | polygons = (updateSelectedPolygonWithNewVertex model.polygons selectedPolygonId coordinates model.interactionCounter), interactionCounter = model.interactionCounter + 1 }, Cmd.none )
+          Nothing ->
+            let
+              newPolygon = (initialPolygon model.interactionCounter coordinates)
+            in
+              ( { model | polygons = (append model.polygons [newPolygon]), selectedPolygonId = Just newPolygon.id, interactionCounter = model.interactionCounter + 1 }, Cmd.none )
 
-    Unlock vertex ->
-      ( { model | vertices = (unlockVertex model.vertices vertex) }, Cmd.none )
+    Unlock polygon vertex ->
+      ( { model | polygons = (unlockVertex model.polygons polygon vertex) }, Cmd.none )
 
     Lock ->
-      ( { model | vertices = (lockAllVertices model.vertices) }, Cmd.none )
+      ( { model | polygons = (lockAllVertices model.polygons) }, Cmd.none )
 
     Track coordinates ->
-      ( { model | vertices = (updateInFlightVertex model.vertices coordinates) }, Cmd.none )
+      ( { model | polygons = (updateInFlightVertex model.polygons coordinates) }, Cmd.none )
 
     KeyPressedResponse key ->
       if key == 8 then
-        ( { model | vertices = (deleteInFlightVertex model.vertices) }, Cmd.none )
+        case (selectedPolygon model.polygons model.selectedPolygonId) of
+          Just selectedPolygon ->
+            if (anyVertexInFlight selectedPolygon.vertices) then
+              if (length selectedPolygon.vertices == 1) then
+                ( { model | polygons = (deletePolygonWithInFlightVertex model.polygons), selectedPolygonId = Nothing }, Cmd.none )
+              else
+                ( { model | polygons = (deleteInFlightVertex model.polygons) }, Cmd.none )
+            else
+              ( model, Cmd.none )
+          Nothing ->
+            ( model, Cmd.none )
       else
         ( model, Cmd.none )
 
-deleteInFlightVertex : List Vertex -> List Vertex
-deleteInFlightVertex vertices =
-  filter isNotInFlight vertices
+selectedPolygon : List Polygon -> Maybe Int -> Maybe Polygon
+selectedPolygon polygons maybeId =
+  case maybeId of
+    Just id -> head (filter (\n -> n.id == id) polygons)
+    Nothing -> Nothing
 
-updateInFlightVertex : List Vertex -> Coordinates -> List Vertex
-updateInFlightVertex vertices coordinates =
-  map (updateVertexCoordinates coordinates) vertices
+updateSelectedPolygonWithNewVertex : List Polygon -> Int -> Coordinates -> Int -> List Polygon
+updateSelectedPolygonWithNewVertex polygons selectedPolygonId coordinates interactionCounter =
+  map (addVertexIfSelected selectedPolygonId coordinates interactionCounter) polygons
 
-unlockVertex : List Vertex -> Vertex -> List Vertex
-unlockVertex vertices vertex =
-  map (updateVertexInFlight vertex.id) vertices
+addVertexIfSelected : Int -> Coordinates -> Int -> Polygon -> Polygon
+addVertexIfSelected selectedPolygonId coordinates interactionCounter polygon =
+  if polygon.id == selectedPolygonId then
+     { polygon | vertices = (append polygon.vertices [(initialVertex interactionCounter coordinates)]) }
+  else
+    polygon
 
-lockAllVertices : List Vertex -> List Vertex
-lockAllVertices vertices =
-  map lockVertex vertices
+deletePolygonWithInFlightVertex : List Polygon -> List Polygon
+deletePolygonWithInFlightVertex polygons =
+  filter (\n -> (not (anyVertexInFlight n.vertices))) polygons
+
+deleteInFlightVertex : List Polygon -> List Polygon
+deleteInFlightVertex polygons =
+  map (\n -> { n | vertices = (filter isNotInFlight n.vertices) }) polygons
+
+updateInFlightVertex : List Polygon -> Coordinates -> List Polygon
+updateInFlightVertex polygons coordinates =
+  map (updatePolygonCoordinates coordinates) polygons
+
+updatePolygonCoordinates : Coordinates -> Polygon -> Polygon
+updatePolygonCoordinates coordinates polygon =
+  { polygon | vertices = (map (updateVertexCoordinates coordinates) polygon.vertices) }
+
+unlockVertex : List Polygon -> Polygon -> Vertex -> List Polygon
+unlockVertex polygons selectedPolygon selectedVertex =
+  map (updateVerticesInPolygon selectedPolygon selectedVertex) polygons
+
+updateVerticesInPolygon : Polygon -> Vertex -> Polygon -> Polygon
+updateVerticesInPolygon selectedPolygon selectedVertex polygon =
+  if polygon.id == selectedPolygon.id then
+    { polygon | vertices = (map (updateVertexInPolygon selectedVertex) polygon.vertices) }
+  else
+    polygon
+
+updateVertexInPolygon : Vertex -> Vertex -> Vertex
+updateVertexInPolygon selectedVertex vertex =
+  if vertex.id == selectedVertex.id then
+    { vertex | inFlight = True }
+  else
+    vertex
+
+lockAllVertices : List Polygon -> List Polygon
+lockAllVertices polygons =
+  map (\n -> { n | vertices = (map lockVertex n.vertices) }) polygons
 
 lockVertex : Vertex -> Vertex
 lockVertex vertex =
@@ -59,9 +116,3 @@ updateVertexCoordinates coordinates vertex =
   else
     vertex
 
-updateVertexInFlight : Int -> Vertex -> Vertex
-updateVertexInFlight id vertex =
-  if (id == vertex.id) then
-    { vertex | inFlight = True }
-  else
-    vertex

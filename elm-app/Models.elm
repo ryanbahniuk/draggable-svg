@@ -1,5 +1,10 @@
 module Models exposing (..)
 
+type alias Polygon =
+  { id : Int
+  , vertices : List Vertex
+  }
+
 type alias Coordinates =
   { x : Int
   , y : Int
@@ -12,15 +17,21 @@ type alias Vertex =
   }
 
 type alias Model =
-  { vertices : List Vertex
+  { polygons : List Polygon
   , interactionCounter : Int
+  , selectedPolygonId : Maybe Int
   }
 
 initialModel : Model
 initialModel =
-  { vertices = []
+  { polygons = []
   , interactionCounter = 0
+  , selectedPolygonId = Nothing
   }
+
+initialPolygon : Int -> Coordinates -> Polygon
+initialPolygon id coordinates =
+  Polygon id [(initialVertex id coordinates)]
 
 initialVertex : Int -> Coordinates -> Vertex
 initialVertex id coordinates =

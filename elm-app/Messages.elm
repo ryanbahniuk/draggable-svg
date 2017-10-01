@@ -1,10 +1,10 @@
 module Messages exposing (..)
 
-import Models exposing (Coordinates, Vertex)
+import Models exposing (Polygon, Coordinates, Vertex)
 
 type Msg
   = Add Coordinates
-  | Unlock Vertex
+  | Unlock Polygon Vertex
   | Lock
   | Track Coordinates
   | KeyPressedResponse Int
